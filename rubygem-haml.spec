@@ -1,12 +1,11 @@
 # Generated from haml-2.2.14.gem by gem2rpm -*- rpm-spec -*-
-%global ruby_sitelib %(ruby -rrbconfig -e "puts Config::CONFIG['sitelibdir']")
 %global gemdir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
 %global gemname haml
 %global geminstdir %{gemdir}/gems/%{gemname}-%{version}
 
 Summary: An elegant, structured XHTML/XML templating engine
 Name: rubygem-%{gemname}
-Version: 2.2.20
+Version: 2.2.24
 Release: 1%{?dist}
 Group: Development/Languages
 License: MIT and WTFPL
@@ -66,9 +65,6 @@ find %{buildroot}%{geminstdir}/bin -type f | xargs chmod a+x
 
 rm %{buildroot}%{geminstdir}/.yardopts
 
-# Remove backup files
-find %{buildroot}/%{geminstdir} -type f -name "*~" -delete
-
 # Fix anything executable that does not have a shebang
 for file in `find %{buildroot}/%{geminstdir} -type f -perm /a+x`; do
     [ -z "`head -n 1 $file | grep \"^#!/\"`" ] && chmod -v 644 $file
@@ -110,11 +106,17 @@ rm -rf %{buildroot}
 %doc %{geminstdir}/VERSION_NAME
 %doc %{geminstdir}/REVISION
 %doc %{geminstdir}/CONTRIBUTING
+%doc %{geminstdir}/REMEMBER
 %{gemdir}/cache/%{gemname}-%{version}.gem
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 
 %changelog
+* Tue May 4 2010 Matthew Kent <mkent@magoazul.com> - 2.2.24-1
+- New upstream version - minor bugfixes and improvements.
+- Drop unused sitelib macro.
+- No backup files to cleanup now.
+
 * Mon Jan 04 2010 Michal Babej <mbabej@redhat.com> - 2.2.20-1
 - update to new upstream release
 
