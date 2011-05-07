@@ -6,22 +6,25 @@
 Summary: An elegant, structured XHTML/XML templating engine
 Name: rubygem-%{gemname}
 Version: 2.2.24
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Development/Languages
 License: MIT and WTFPL
 URL: http://haml-lang.com/
 Source0: http://gems.rubyforge.org/gems/%{gemname}-%{version}.gem
+Source1: emacs-mode-init.el.in
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: rubygems
 Requires: ruby(abi) = 1.8
 # for html2haml
 Requires: rubygem(hpricot)
+Requires: emacs(bin)
 
 BuildRequires: rubygems
 BuildRequires: ruby
 BuildRequires: rubygem(rails)
 BuildRequires: rubygem(hpricot)
+BuildRequires: emacs
 
 BuildArch: noarch
 Provides: rubygem(%{gemname}) = %{version}
@@ -81,6 +84,16 @@ find %{buildroot}/%{geminstdir} -type f -perm /g+wx -exec chmod -v g-w {} \;
 # Find files that are not readable
 find %{buildroot}/%{geminstdir} -type f ! -perm /go+r -exec chmod -v go+r {} \;
 
+# Set up emacs modes
+mkdir -p %{buildroot}%{_emacs_sitelispdir}/%{pkg}
+for mode in haml sass; do
+  mv %{buildroot}/%{geminstdir}/extra/${mode}-mode.el %{buildroot}%{_emacs_sitelispdir}/${mode}-mode.el
+  %{_emacs_bytecompile} %{buildroot}%{_emacs_sitelispdir}/${mode}-mode.el
+  install -Dpm 644 %{SOURCE1} %{buildroot}%{_emacs_sitestartdir}/${mode}-mode-init.el
+  sed -i "s/%{mode}/${mode}/g" %{buildroot}%{_emacs_sitestartdir}/${mode}-mode-init.el
+done
+rm %{buildroot}%{geminstdir}/extra/update_watch.rb
+rmdir %{buildroot}%{geminstdir}/extra
 
 %clean
 rm -rf %{buildroot}
@@ -94,7 +107,6 @@ rm -rf %{buildroot}
 %dir %{geminstdir}
 %{geminstdir}/Rakefile
 %{geminstdir}/bin
-%{geminstdir}/extra
 %{geminstdir}/init.rb
 %{geminstdir}/lib
 %{geminstdir}/rails
@@ -109,9 +121,13 @@ rm -rf %{buildroot}
 %doc %{geminstdir}/REMEMBER
 %{gemdir}/cache/%{gemname}-%{version}.gem
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
-
+%{_emacs_sitelispdir}/*-mode.el*
+%{_emacs_sitestartdir}/*-mode-init.el
 
 %changelog
+* Sat May  7 2011 Mark McLoughlin <markmc@redhat.com> - 2.2.24-2
+- Package emacs modes correctly
+
 * Tue May 4 2010 Matthew Kent <mkent@magoazul.com> - 2.2.24-1
 - New upstream version - minor bugfixes and improvements.
 - Drop unused sitelib macro.

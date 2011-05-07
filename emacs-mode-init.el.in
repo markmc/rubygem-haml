@@ -1,0 +1,2 @@
+(autoload '%{mode}-mode "%{mode}-mode" "%{mode} mode" t)
+(add-to-list 'auto-mode-alist '("\\.%{mode}\\(\\.in\\)?$" . %{mode}-mode))
